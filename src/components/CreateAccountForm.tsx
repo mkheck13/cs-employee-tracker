@@ -95,7 +95,7 @@ const CreateAccountForm = () => {
       >
         {creatingAccount ? (
           <>
-            <AiOutlineLoading className="h-6 w-6 animate-spin mr-3" />
+            <AiOutlineLoading className="h-6 w-6 animate-spin mr-3 " />
             Creating Account...
           </>
         ) : (

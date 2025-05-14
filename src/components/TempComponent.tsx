@@ -12,7 +12,7 @@ import { Calendar } from './ui/calendar';
 import { CalendarIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog';
-import { format } from 'path';
+// import { format } from 'path';
 
 const TempComponent = ({ type, employee, refreshEmployees }: { type: 'Add' | 'Edit', employee: Employee, refreshEmployees: () => Promise<void> }) => {
     // useStates
@@ -124,7 +124,7 @@ const TempComponent = ({ type, employee, refreshEmployees }: { type: 'Add' | 'Ed
 
     
     return (
-        <Dialog>
+        <Dialog open={openModal} onOpenChange={setOpenModal}>
             <DialogTrigger asChild>
                 <Button variant="outline">Edit Profile</Button>
                 <Button

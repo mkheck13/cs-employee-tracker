@@ -9,9 +9,15 @@ import { FaCaretDown, FaCaretUp } from 'react-icons/fa';
 import { Button } from './ui/button';
 import { TableHeader, TableRow, TableHead, TableBody, TableCell, Table } from './ui/table';
 import EmployeeModal from './EmployeeModal';
+import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationPrevious, PaginationNext } from './ui/pagination'
 
 const EmployeeTable = () => {
     const { push } = useRouter();
+
+    // setting pages
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 8;
+    
 
     // useStates
     const [employees, setEmployees] = useState<Employee[]>([]);
@@ -21,6 +27,8 @@ const EmployeeTable = () => {
 
     const [sortBy, setSortBy] = useState("");
     const [sortByJob, setSortByJob] = useState("");
+
+    const totalPages = Math.ceil(sortedEmployees.length / itemsPerPage);
 
     // Function to get employees
     const handleGetEmployees = async () => {
@@ -40,17 +48,9 @@ const EmployeeTable = () => {
 
     // Updating sort functions
     const changeSortBy = (value: string) => {
-        if (value == "name" && sortBy == "name") {
-            setSortBy(`${value}-reverse`);
-        } else if (value == "hire-date" && sortBy == "hire-date") {
-            setSortBy(`${value}-reverse`);
-        } else {
-            setSortBy(value);
-        }
 
-        if (sortByJob) {
-            setSortByJob("");
-        }
+        setSortBy(value);
+        setSortByJob('');
     };
 
     const changeSortByJob = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -93,7 +93,7 @@ const EmployeeTable = () => {
 
     // Sorting the employees
     useEffect(() => {
-        const sortingEmployees = employees;
+        let sortingEmployees = [...employees];
 
         const handleSorting = () => {
             switch (sortBy) {
@@ -114,7 +114,7 @@ const EmployeeTable = () => {
                     );
                     break;
                 case "job-title":
-                    sortingEmployees.filter((employee: Employee) => employee.jobTitle == sortByJob);
+                    sortingEmployees = sortingEmployees.filter((employee) => employee.jobTitle === sortByJob);
                     break;
                 default:
                     sortingEmployees.sort((a: Employee, b: Employee) => a.id - b.id);
@@ -126,6 +126,11 @@ const EmployeeTable = () => {
         handleSorting();
 
     }, [employees, sortBy, sortByJob]);
+
+    // Reset page when sorting changes
+    useEffect(() =>{
+        setCurrentPage(1);
+    }, [sortBy, sortByJob]);
 
     return (
         <>
@@ -144,7 +149,8 @@ const EmployeeTable = () => {
                             <DropdownMenuTrigger asChild>
                                 <Button variant="outline" className="text-sm text-gray-600">
                                     Name
-                                    {sortBy === "name" ? <FaCaretDown className="ml-2" /> : sortBy === "name-reverse" ? <FaCaretUp className="ml-2" /> : ""}
+                                    {sortBy === "name" && <FaCaretDown className="ml-2" />} 
+                                    {sortBy === "name-reverse" && <FaCaretUp className="ml-2" />}
                                 </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent>
@@ -157,7 +163,8 @@ const EmployeeTable = () => {
                             <DropdownMenuTrigger asChild>
                                 <Button variant="outline" className="text-sm text-gray-600">
                                     Hire date
-                                    {sortBy === "hire-date" ? <FaCaretDown className="ml-2" /> : sortBy === "hire-date-reverse" ? <FaCaretUp className="ml-2" /> : ""}
+                                    {sortBy === "hire-date" && <FaCaretDown className="ml-2" />}
+                                    {sortBy === "hire-date-reverse" && <FaCaretUp className="ml-2" />}
                                 </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent>
@@ -203,7 +210,7 @@ const EmployeeTable = () => {
                             <TableCell></TableCell>
                         </TableRow>
                     ) : (
-                        sortedEmployees.map((employee, idx) => (
+                        sortedEmployees.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage).map((employee, idx) => (
                             <TableRow key={idx}>
                                 <TableCell className="font-medium">{employee.name}</TableCell>
                                 <TableCell>{employee.jobTitle}</TableCell>
@@ -220,6 +227,33 @@ const EmployeeTable = () => {
                 </TableBody>
             </Table>
             {/* Display table - End */}
+
+            {/* Pagination - Start */}
+
+            {sortedEmployees.length > itemsPerPage && (
+                <Pagination>
+                    <PaginationContent>
+                        {currentPage > 1 && (
+                            <PaginationItem>
+                                <PaginationPrevious onClick={()=> setCurrentPage((p) => p - 1)}/>
+                            </PaginationItem>
+                        )}
+
+                        {Array.from({ length: totalPages}, (_, i) => (
+                            <PaginationItem key={i}>
+                                <PaginationLink isActive={currentPage === i + 1} onClick={()=> setCurrentPage(i + 1)} href='#'>{i + 1}</PaginationLink>
+                            </PaginationItem>
+                        ))}
+
+                        {currentPage < totalPages && (
+                            <PaginationItem>
+                                <PaginationNext onClick={()=> setCurrentPage((p) => p + 1)}/>
+                            </PaginationItem>
+                        )}
+                    </PaginationContent>
+                </Pagination>
+            )}
+            {/* Pagination - End */}
         </>
     )
 }
